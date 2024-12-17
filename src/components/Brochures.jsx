@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react'
-
+import anime from 'animejs/lib/anime.es.js';
+import { useEffect } from 'react';
 export default function Brochures({ id }) {
+
   return (
     <section id={id} className="section">
       <div className="container">
@@ -16,6 +18,37 @@ export default function Brochures({ id }) {
 }
 
 function BrochureCard({ title, filename }) {
+
+  const handleScrollAnimation = (entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+       
+        anime({
+          targets: entry.target,
+          translateX: [100, 0], 
+          opacity: [0, 1], 
+          duration: 1000,
+          easing: 'easeOutExpo',
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleScrollAnimation, {
+      threshold: 0.1, 
+    });
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      observer.observe(card);
+    });
+
+    return () => {
+      // Clean up the observer when the component unmounts
+      cards.forEach(card => observer.unobserve(card));
+    };
+  }, []);
   return (
     <div className="card">
       <div className="card-header">
