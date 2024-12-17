@@ -21,23 +21,42 @@ function BrochureCard({ title, filename }) {
 
   const handleScrollAnimation = (entries, observer) => {
     entries.forEach(entry => {
+      const card = entry.target;
+      
+
+      card.dataset.isAnimating = 'true';
+
       if (entry.isIntersecting) {
-       
         anime({
-          targets: entry.target,
+          targets: card,
           translateX: [100, 0], 
           opacity: [0, 1], 
           duration: 1000,
           easing: 'easeOutExpo',
+     
+          complete: () => {
+            card.dataset.isAnimating = 'false';
+          },
         });
-        observer.unobserve(entry.target);
+      } else {
+        anime({
+          targets: card,
+          translateX: [0, -100], 
+          opacity: [1, 0], // 
+          duration: 500,
+          easing: 'easeInExpo',
+          complete: () => {
+            card.dataset.isAnimating = 'false';
+          },
+        });
       }
     });
   };
 
   useEffect(() => {
     const observer = new IntersectionObserver(handleScrollAnimation, {
-      threshold: 0.1, 
+      threshold: 0.25,
+      rootMargin: '0px 0px -25% 0px', 
     });
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
@@ -45,10 +64,11 @@ function BrochureCard({ title, filename }) {
     });
 
     return () => {
-      // Clean up the observer when the component unmounts
+
       cards.forEach(card => observer.unobserve(card));
     };
   }, []);
+
   return (
     <div className="card">
       <div className="card-header">

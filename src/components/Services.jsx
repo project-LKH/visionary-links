@@ -31,24 +31,45 @@ export default function Services({ id }) {
 
 function ServiceCard({ icon, title, description }) {
    const handleScrollAnimation = (entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-         
-          anime({
-            targets: entry.target,
-            translateX: [100, 0], 
-            opacity: [0, 1], 
-            duration: 1000,
-            easing: 'easeOutExpo',
-          });
-          observer.unobserve(entry.target);
-        }
-      });
+    entries.forEach(entry => {
+      const card = entry.target;
+      
+      if (card.dataset.isAnimating === 'true') return;  
+
+      card.dataset.isAnimating = 'true';
+
+      if (entry.isIntersecting) {
+        anime({
+          targets: card,
+          translateX: [100, 0], 
+          opacity: [0, 1], 
+          duration: 1000,
+          easing: 'easeOutExpo',
+      
+          complete: () => {
+            card.dataset.isAnimating = 'false';
+          },
+        });
+      } else {
+        anime({
+          targets: card,
+          translateX: [0, -100], 
+          opacity: [1, 0], 
+          duration: 500,
+          easing: 'easeInExpo',
+          complete: () => {
+            card.dataset.isAnimating = 'false';
+          },
+        });
+      }
+    });
     };
   
     useEffect(() => {
       const observer = new IntersectionObserver(handleScrollAnimation, {
-        threshold: 0.1, 
+        threshold: 0.20, 
+        rootMargin: '0px 0px -20% 0px',
+
       });
       const cards = document.querySelectorAll('.service-card');
       cards.forEach(card => {
@@ -59,6 +80,7 @@ function ServiceCard({ icon, title, description }) {
         cards.forEach(card => observer.unobserve(card));
       };
     }, []);
+
   return (
     <div className="service-card">
       <div className="service-icon">{icon}</div>
